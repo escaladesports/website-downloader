@@ -1,54 +1,37 @@
 'use strict'
-
-/*
-
-	- Check page
-	- Crawl DOM for links
-	
-
-	const scraper = require('webs-teiscraper')
-
-	new scraper({
-		url: 'https://www.escaladesports.com/',
-		path: './site',
-		filterUrl: function(url){
-	
-		},
-		filterContent: function(content){
-			
-		},
-		alter: function(page){
-			// page === { name: '', contents: '' }
-		},
-		urlFinder: 'string'
-	}, err => {
-		if(err) throw err
-	})
-
-*/
-
-const jsdom = require('jsdom')
+const fs = require('fs-extra')
+const request = require('request')
+const scrapePage = require('./src/scrape-page')
+const scrapeStyle = require('./src/scrape-style')
 
 const defaultOptions = {
 	getLinks: true,
 	getStyles: true,
 	getScripts: true,
 	getImages: true,
-	getContent: false,
-	relativeLinks: false,
+	verbose: true,
 	method: 'dom',
-	filter: href => { return true }
+	downloadPath: './download',
+	filter: () => true
 }
 
-function scrapeLinks(url, opt, cb){
+
+function websiteScraper(urls, opt, cb){
 
 	// Find options
 	if(typeof opt === 'function'){
 		cb = opt
 		opt = {}
 	}
-	if(typeof url === 'object') opt = url
-	else opt.url = url
+	if(typeof urls === 'string'){
+		opt.urls = [urls]
+	}
+	else if(Array.isArray(urls)){
+		opt.urls = urls
+	}
+	else{
+		opt = urls
+	}
 
 	let i
 	for(i in defaultOptions){
@@ -57,146 +40,156 @@ function scrapeLinks(url, opt, cb){
 		}
 	}
 
+	const queue = {
+		links: opt.urls.slice(0),
+		scripts: [],
+		styles: [],
+		images: []
+	}
 
-	jsdom.env({
-		url: opt.url,
-		done: (err, window) => {
+	downloadPages(queue, 0, opt, err => {
+		if(err) cb(err)
+		downloadStyles(queue, 0, opt, err => {
 			if(err) cb(err)
+			downloadScripts(queue, 0, opt, err => {
+				if(err) cb(err)
+				downloadImages(queue, 0, opt, err => {
+					if(err) cb(err)
+					cb()
+				})
+			})
+		})
+	})
 
-			const output = {}
+}
 
-			let i, els, link
 
-			// Get links
-			if(opt.getLinks){
-				output.links = []
-				els = window.document.querySelectorAll('a')
-				for(i = 0; i < els.length; i++){
-					link = els[i].href
-					if(checkLink(link, opt)){
-						output.links.push(link)
-					}
+function downloadPages(queue, progress, opt, cb){
+	if(progress >= queue.links.length){
+		return cb()
+	}
+	if(opt.verbose === true){
+		console.log(`Pages: ${progress + 1}/${queue.links.length}`)
+		console.log(`Downloading page: ${queue.links[progress]}`)
+	}
+	scrapePage(queue.links[progress], opt, (err, obj) => {
+		if(err) cb(err)
+		addQueue(queue.links, obj.links)
+		addQueue(queue.styles, obj.styles)
+		addQueue(queue.scripts, obj.scripts)
+		addQueue(queue.images, obj.images)
+		let path = `${opt.downloadPath}/${localizeLink(queue.links[progress])}`
+		fs.outputFile(path, obj.content, err => {
+			if(err) cb(err)
+			if(opt.verbose === true){
+				console.log(`Downloaded page to: ${path}`)
+			}
+			// Progress
+			downloadPages(queue, progress + 1, opt, cb)
+		})
+
+	})
+}
+
+function downloadStyles(queue, progress, opt, cb){
+	if(progress >= queue.styles.length){
+		return cb()
+	}
+	if(opt.verbose === true){
+		console.log(`Styles: ${progress + 1}/${queue.links.length}`)
+		console.log(`Downloading style: ${queue.styles[progress]}`)
+	}
+	scrapeStyle(queue.styles[progress], (err, data) => {
+		if(err) cb(err)
+		let path = `${opt.downloadPath}/${localizeLink(queue.styles[progress])}`
+		fs.outputFile(path, data, err => {
+			if(err) cb(err)
+			if(opt.verbose === true){
+				console.log(`Downloaded style to: ${path}`)
+			}
+			// Progress
+			downloadStyles(queue, progress + 1, opt, cb)
+		})
+
+	})
+}
+
+
+function downloadScripts(queue, progress, opt, cb){
+	if(progress >= queue.scripts.length){
+		return cb()
+	}
+	if(opt.verbose === true){
+		console.log(`Scripts: ${progress + 1}/${queue.scripts.length}`)
+		console.log(`Downloading script: ${queue.scripts[progress]}`)
+	}
+	request.get(queue.scripts[progress], (err, res, body) => {
+		if(err) cb(err)
+		if(res.statusCode === 200){
+			let path = `${opt.downloadPath}/${localizeLink(queue.scripts[progress])}`
+			fs.outputFile(path, body, err => {
+				if(err) cb(err)
+				if(opt.verbose === true){
+					console.log(`Downloaded script to: ${path}`)
 				}
-			}
+				// Progress
+				downloadScripts(queue, progress + 1, opt, cb)
+			})
+		}
+	})
+}
 
-			// Get images
-			if(opt.getImages){
-				output.images = []
-				els = window.document.querySelectorAll('img')
-				for(i = 0; i < els.length; i++){
-					link = els[i].src
-					if(link && checkLink(link, opt)){
-						output.images.push(link)
-					}
+function downloadImages(queue, progress, opt, cb){
+	if(progress >= queue.images.length){
+		return cb()
+	}
+	if(opt.verbose === true){
+		console.log(`Images: ${progress + 1}/${queue.images.length}`)
+		console.log(`Downloading image: ${queue.images[progress]}`)
+	}
+	request.get(queue.images[progress], (err, res, body) => {
+		if(err) cb(err)
+		if(res.statusCode === 200){
+			let path = `${opt.downloadPath}/${localizeLink(queue.images[progress])}`
+			fs.outputFile(path, body, err => {
+				if(err) cb(err)
+				if(opt.verbose === true){
+					console.log(`Downloaded image to: ${path}`)
 				}
-			}
-
-			// Get stylesheets
-			if(opt.getStyles){
-				output.styles = []
-				els = window.document.querySelectorAll('link')
-				for(i = 0; i < els.length; i++){
-					if(els[i].rel && els[i].rel === 'stylesheet' && checkLink(els[i].href, opt)){
-						output.styles.push(els[i].href)
-					}
-				}
-			}
-
-			// Get scripts
-			if(opt.getScripts){
-				output.scripts = []
-				els = window.document.querySelectorAll('script')
-				for(i = 0; i < els.length; i++){
-					if(checkLink(els[i].src, opt)){
-						output.scripts.push(els[i].src)
-					}
-				}
-			}
-
-			// Get custom links
-			if('custom' in opt){
-				let key
-				let attr
-				for(key in opt.custom){
-					els = window.document.querySelectorAll(opt.custom[key].querySelector)
-					output[key] = []
-					for(i = 0; i < els.length; i++){
-						attr = els[i].getAttribute(opt.custom[key].attribute)
-						if(checkLink(attr, opt)){
-							output[key].push(attr)
-						}
-					}
-				}
-			}
-
-			if(opt.getMarkup === true){
-				output.content = `<!DOCTYPE HTML>${window.document.documentElement.outerHTML}`
-			}
-			
-			cb(false, output)
-
+				// Progress
+				downloadImages(queue, progress + 1, opt, cb)
+			})
 		}
 	})
 }
 
 
+function localizeLink(link){
+	// Remove domain
+	link = link.split('//')[1].split('/')
+	link.shift()
 
-// Makes link relative
-function relativeLink(currentPage, targetPage){
-
-	// Remove domains
-	currentPage = currentPage.split('//')[1].split('/')
-	if(currentPage[currentPage.length - 1].indexOf('.') > -1){
-		currentPage.shift()
-	}
-	targetPage = targetPage.split('//')[1].split('/')
-	targetPage.shift()
-
-
-	currentPage.pop()
-	let i
-	for(i = currentPage.length; i--;){
-		currentPage[i] = '..'
+	// Create index file
+	if(link[link.length - 1].indexOf('.') === -1){
+		link.push('index.html')
 	}
 
-
-	// Rejoin paths
-	currentPage = currentPage.join('/')
-	targetPage = targetPage.join('/')
-
-	return `${currentPage}/${targetPage}`
+	return link.join('/')
 }
 
-
-let link = relativeLink(
-	'http://www.escaladesports.com/product/B5401W',
-	'https://cdn.escaladesports.com/1200/B5401W_SB54_Main.jpg'
-)
-console.log(link)
-
-
-// Validates link
-function checkLink(link, opt){
-	if(
-		link &&
-		link.indexOf('http') === 0 &&
-		opt.filter(link)
-	){
-		if(opt.domains){
-			let i
-			let domain = link.split('//')[1].split('/')[0]
-			if(opt.domains.indexOf(domain) === -1){
-				return false
+function addQueue(addTo, addFrom){
+	if(addFrom){
+		let i
+		for(i = addFrom.length; i--;){
+			if(addTo.indexOf(addFrom[i]) === -1){
+				addTo.push(addFrom[i])
 			}
 		}
-		return true
 	}
 }
 
 
-
-module.exports = scrapeLinks
-
+module.exports = websiteScraper
 
 
 

@@ -1,8 +1,8 @@
 'use strict'
 
-const scrapeLinks = require('./app')
+const scrapePage = require('./app')
 
-scrapeLinks('http://www.escaladesports.com/product/B5401W', {
+scrapePage('http://www.escaladesports.com/', {
 	domains: [
 		'www.escaladesports.com',
 		'escaladesports.com',
@@ -15,10 +15,10 @@ scrapeLinks('http://www.escaladesports.com/product/B5401W', {
 		}
 	},
 	relativeLinks: true,
-	content: true,
-	method: 'string'
+	getContent: true
 }, (err, content) => {
 	if(err) throw err
 
-	console.log(JSON.stringify(content, null, 4))
+	console.log('DONE!')
+
 })

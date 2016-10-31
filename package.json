@@ -15,6 +15,7 @@
   "author": "Kennedy Rose <kennedy@kennedyrose.com> (http://kennedyrose.com)",
   "license": "MIT",
   "dependencies": {
+    "fs-extra": "^0.30.0",
     "jsdom": "^9.8.3"
   }
 }
