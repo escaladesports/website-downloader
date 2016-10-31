@@ -126,7 +126,10 @@ function downloadScripts(queue, progress, opt, cb){
 
 	let path = `${opt.downloadPath}/${localizeLink(queue.scripts[progress])}`
 	downloadFile(queue.images[progress], path, err => {
-		if(err) return cb(err)
+		if(err){
+			console.log(err)
+			cb()
+		}
 		if(opt.verbose === true){
 			console.log(`Downloaded script to: ${path}`)
 		}
@@ -146,7 +149,10 @@ function downloadImages(queue, progress, opt, cb){
 	}
 	let path = `${opt.downloadPath}/${localizeLink(queue.images[progress])}`
 	downloadFile(queue.images[progress], path, err => {
-		if(err) return cb(err)
+		if(err){
+			console.log(err)
+			cb()
+		}
 		if(opt.verbose === true){
 			console.log(`Downloaded image to: ${path}`)
 		}
