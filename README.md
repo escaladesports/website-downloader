@@ -1,3 +1,3 @@
-# Website Scraper
+# Website Downloader
 
 WIP
