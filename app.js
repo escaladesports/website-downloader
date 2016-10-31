@@ -48,13 +48,13 @@ function websiteScraper(urls, opt, cb){
 	}
 
 	downloadPages(queue, 0, opt, err => {
-		if(err) cb(err)
+		if(err) return cb(err)
 		downloadStyles(queue, 0, opt, err => {
-			if(err) cb(err)
+			if(err) return cb(err)
 			downloadScripts(queue, 0, opt, err => {
-				if(err) cb(err)
+				if(err) return cb(err)
 				downloadImages(queue, 0, opt, err => {
-					if(err) cb(err)
+					if(err) return cb(err)
 					cb()
 				})
 			})
@@ -73,14 +73,14 @@ function downloadPages(queue, progress, opt, cb){
 		console.log(`Downloading page: ${queue.links[progress]}`)
 	}
 	scrapePage(queue.links[progress], opt, (err, obj) => {
-		if(err) cb(err)
+		if(err) return cb(err)
 		addQueue(queue.links, obj.links)
 		addQueue(queue.styles, obj.styles)
 		addQueue(queue.scripts, obj.scripts)
 		addQueue(queue.images, obj.images)
 		let path = `${opt.downloadPath}/${localizeLink(queue.links[progress])}`
 		fs.outputFile(path, obj.content, err => {
-			if(err) cb(err)
+			if(err) return cb(err)
 			if(opt.verbose === true){
 				console.log(`Downloaded page to: ${path}`)
 			}
@@ -100,10 +100,10 @@ function downloadStyles(queue, progress, opt, cb){
 		console.log(`Downloading style: ${queue.styles[progress]}`)
 	}
 	scrapeStyle(queue.styles[progress], (err, data) => {
-		if(err) cb(err)
+		if(err) return cb(err)
 		let path = `${opt.downloadPath}/${localizeLink(queue.styles[progress])}`
 		fs.outputFile(path, data, err => {
-			if(err) cb(err)
+			if(err) return cb(err)
 			if(opt.verbose === true){
 				console.log(`Downloaded style to: ${path}`)
 			}
@@ -124,11 +124,11 @@ function downloadScripts(queue, progress, opt, cb){
 		console.log(`Downloading script: ${queue.scripts[progress]}`)
 	}
 	request.get(queue.scripts[progress], (err, res, body) => {
-		if(err) cb(err)
+		if(err) return cb(err)
 		if(res.statusCode === 200){
 			let path = `${opt.downloadPath}/${localizeLink(queue.scripts[progress])}`
 			fs.outputFile(path, body, err => {
-				if(err) cb(err)
+				if(err) return cb(err)
 				if(opt.verbose === true){
 					console.log(`Downloaded script to: ${path}`)
 				}
@@ -147,19 +147,14 @@ function downloadImages(queue, progress, opt, cb){
 		console.log(`Images: ${progress + 1}/${queue.images.length}`)
 		console.log(`Downloading image: ${queue.images[progress]}`)
 	}
-	request.get(queue.images[progress], (err, res, body) => {
-		if(err) cb(err)
-		if(res.statusCode === 200){
-			let path = `${opt.downloadPath}/${localizeLink(queue.images[progress])}`
-			fs.outputFile(path, body, err => {
-				if(err) cb(err)
-				if(opt.verbose === true){
-					console.log(`Downloaded image to: ${path}`)
-				}
-				// Progress
-				downloadImages(queue, progress + 1, opt, cb)
-			})
+	let path = `${opt.downloadPath}/${localizeLink(queue.images[progress])}`
+	downloadFile(queue.images[progress], path, err => {
+		if(err) return cb(err)
+		if(opt.verbose === true){
+			console.log(`Downloaded image to: ${path}`)
 		}
+		// Progress
+		downloadImages(queue, progress + 1, opt, cb)
 	})
 }
 
@@ -186,6 +181,29 @@ function addQueue(addTo, addFrom){
 			}
 		}
 	}
+}
+
+
+function downloadFile(url, dest, cb) {
+	const file = fs.createWriteStream(dest)
+	const sendReq = request.get(url)
+	sendReq.on('response', res => {
+		if(res.statusCode !== 200) {
+			return cb(`Response status was ${res.statusCode}`)
+		}
+	})
+	sendReq.on('error', err => {
+		fs.unlink(dest)
+		return cb(err.message)
+	})
+	sendReq.pipe(file)
+	file.on('finish', () => {
+		file.close(cb)
+	})
+	file.on('error', err => {
+		fs.unlink(dest)
+		return cb(err.message)
+	})
 }
 
 
