@@ -1,6 +1,6 @@
 {
   "name": "website-downloader",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Crawls and downloads websites for offline use.",
   "main": "app.js",
   "scripts": {},
