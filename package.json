@@ -1,0 +1,20 @@
+{
+  "name": "website-scraper",
+  "version": "0.0.0",
+  "description": "Scrapes websites.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "website",
+    "scraper",
+    "domain",
+    "downloader"
+  ],
+  "author": "Kennedy Rose <kennedy@kennedyrose.com> (http://kennedyrose.com)",
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^9.8.3"
+  }
+}
