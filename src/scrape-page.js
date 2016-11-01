@@ -16,8 +16,8 @@ function scrapePage(url, opt, cb){
 			let i, els, link
 
 			// Apply transforms
-			if('transformDom' in opt){
-				opt.transformDom(window)
+			if('preDomTransform' in opt){
+				opt.preDomTransform(window)
 			}
 
 			// Get links
@@ -101,7 +101,15 @@ function scrapePage(url, opt, cb){
 			}
 
 			if(opt.getContent === true){
-				output.content = `<!DOCTYPE HTML>${window.document.documentElement.outerHTML}`
+				// Apply transforms
+				if('postDomTransform' in opt){
+					opt.postDomTransform(window)
+				}
+				let str = `<!DOCTYPE HTML>${window.document.documentElement.outerHTML}`
+				if('postStringTransform' in opt){
+					str = opt.postStringTransform(str)
+				}
+				output.content = str
 			}
 			
 			cb(false, output)

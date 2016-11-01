@@ -16,8 +16,12 @@ scrapePage('http://www.escaladesports.com/', {
 	},
 	relativeLinks: false,
 	getContent: true,
-	transformDom: function(window){
+	postDomTransform: function(window){
 		window.document.body.classList.add('offline')
+	},
+	postStringTransform: function(str){
+		str = str.replace(/https:\/\/cdn.escaladesports.com/g, '')
+		return str
 	}
 }, (err, content) => {
 	if(err) throw err
