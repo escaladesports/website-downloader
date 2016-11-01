@@ -79,6 +79,12 @@ function downloadPages(queue, progress, opt, cb){
 		addQueue(queue.styles, obj.styles)
 		addQueue(queue.scripts, obj.scripts)
 		addQueue(queue.images, obj.images)
+		if('custom' in opt){
+			let i
+			for(i in opt.custom){
+				addQueue(queue.images, obj[i])
+			}
+		}
 		let path = decodeURIComponent(`${opt.downloadPath}/${localizeLink(queue.links[progress])}`)
 		fs.outputFile(path, obj.content, err => {
 			if(err) return cb(err)
