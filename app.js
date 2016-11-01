@@ -10,6 +10,7 @@ const defaultOptions = {
 	getScripts: true,
 	getImages: true,
 	verbose: true,
+	relativeLinks: true,
 	method: 'dom',
 	downloadPath: './download',
 	filter: () => true
@@ -175,6 +176,7 @@ function localizeLink(link){
 
 	link = link.join('/')
 	link = link.split('?')[0]
+	link = link.split('#')[0]
 
 	return link
 }

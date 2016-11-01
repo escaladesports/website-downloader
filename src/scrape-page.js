@@ -1,4 +1,5 @@
 'use strict'
+const path = require('path')
 const jsdom = require('jsdom')
 const checkLink = require('./validate')
 const relativeLink = require('./relative-link')
@@ -29,7 +30,9 @@ function scrapePage(url, opt, cb){
 					if(checkLink(link, opt)){
 						output.links.push(link)
 						if(opt.relativeLinks === true){
-							els[i].setAttribute('href', relativeLink(url, link))
+							link = path.relative(url, link)
+							if(!link) link = '../'
+							els[i].setAttribute('href', link)
 						}
 					}
 				}
@@ -44,7 +47,7 @@ function scrapePage(url, opt, cb){
 					if(link && checkLink(link, opt)){
 						output.images.push(link)
 						if(opt.relativeLinks === true){
-							els[i].setAttribute('src', relativeLink(url, link))
+							els[i].setAttribute('src', path.relative(url, link))
 						}
 					}
 				}
@@ -59,7 +62,7 @@ function scrapePage(url, opt, cb){
 					if(els[i].rel && els[i].rel === 'stylesheet' && checkLink(link, opt)){
 						output.styles.push(link)
 						if(opt.relativeLinks === true){
-							els[i].setAttribute('href', relativeLink(url, link))
+							els[i].setAttribute('href', path.relative(url, link))
 						}
 					}
 				}
@@ -74,7 +77,7 @@ function scrapePage(url, opt, cb){
 					if(checkLink(link, opt)){
 						output.scripts.push(link)
 						if(opt.relativeLinks === true){
-							els[i].setAttribute('src', relativeLink(url, link))
+							els[i].setAttribute('src', path.relative(url, link))
 						}
 					}
 				}
@@ -91,7 +94,7 @@ function scrapePage(url, opt, cb){
 						if(checkLink(link, opt)){
 							output[key].push(link)
 							if(opt.relativeLinks === true){
-								els[i].setAttribute(opt.custom[key].attribute, relativeLink(url, link))
+								els[i].setAttribute(opt.custom[key].attribute, path.relative(url, link))
 							}
 						}
 					}

@@ -1,6 +1,6 @@
 'use strict'
-
 const scrapePage = require('./app')
+const path = require('path')
 
 scrapePage('http://www.escaladesports.com/', {
 	domains: [

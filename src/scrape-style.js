@@ -1,7 +1,7 @@
 'use strict'
+const path = require('path')
 const request = require('request')
 const checkLink = require('./validate')
-const relativeLink = require('./relative-link')
 
 // Regex for getting CSS urls
 const regUrls = /url\((?!['"]?(?:data):)['"]?([^'"\)]*)['"]?\)/gi
@@ -19,7 +19,7 @@ function scrapeStyle(url, opt, cb){
 
 
 			const domain = getDomain(url)
-			const path = getDomainPath(url)
+			const domainPath = getDomainPath(url)
 			let sanitizedUrl
 			let urls = body.match(regUrls)
 			let i
@@ -31,7 +31,7 @@ function scrapeStyle(url, opt, cb){
 						sanitizedUrl = domain + sanitizedUrl
 					}
 					else{
-						sanitizedUrl = `${path}/${sanitizedUrl}`
+						sanitizedUrl = `${domainPath}/${sanitizedUrl}`
 					}
 				}
 
@@ -39,7 +39,7 @@ function scrapeStyle(url, opt, cb){
 
 				if(checkLink(sanitizedUrl, opt)){
 					// Relative-ize link
-					output.content = output.content.replace(urls[i], `url("${relativeLink(url, sanitizedUrl)}")`)
+					output.content = output.content.replace(urls[i], `url("${path.relative(url, sanitizedUrl)}")`)
 					output.urls.push(sanitizedUrl)
 				}
 			}
