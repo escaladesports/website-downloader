@@ -108,14 +108,21 @@ function relativeLink(currentPage, targetPage){
 
 	// Remove domains
 	currentPage = currentPage.split('//')[1].split('/')
+	currentPage.shift()
+
+
+	// If file, back up to current directory
 	if(currentPage[currentPage.length - 1].indexOf('.') > -1){
-		currentPage.shift()
+		currentPage.pop()
 	}
 	targetPage = targetPage.split('//')[1].split('/')
 	targetPage.shift()
 
+	if(currentPage[currentPage.length - 1] === ''){
+		currentPage.pop()
+	}
 
-	currentPage.pop()
+
 	let i
 	for(i = currentPage.length; i--;){
 		currentPage[i] = '..'
@@ -126,7 +133,10 @@ function relativeLink(currentPage, targetPage){
 	currentPage = currentPage.join('/')
 	targetPage = targetPage.join('/')
 
-	return `${currentPage}/${targetPage}`
+	if(currentPage) currentPage = currentPage + '/'
+
+
+	return `${currentPage}${targetPage}`
 }
 
 

@@ -125,7 +125,7 @@ function downloadScripts(queue, progress, opt, cb){
 	}
 
 	let path = `${opt.downloadPath}/${localizeLink(queue.scripts[progress])}`
-	downloadFile(queue.images[progress], path, err => {
+	downloadFile(queue.scripts[progress], path, err => {
 		if(err){
 			console.log(err)
 			cb()
@@ -134,7 +134,7 @@ function downloadScripts(queue, progress, opt, cb){
 			console.log(`Downloaded script to: ${path}`)
 		}
 		// Progress
-		downloadImages(queue, progress + 1, opt, cb)
+		downloadScripts(queue, progress + 1, opt, cb)
 	})
 
 }
@@ -172,7 +172,10 @@ function localizeLink(link){
 		link.push('index.html')
 	}
 
-	return link.join('/')
+	link = link.join('/')
+	link = link.split('?')[0]
+
+	return link
 }
 
 function addQueue(addTo, addFrom){

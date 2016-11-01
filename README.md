@@ -3,7 +3,7 @@
 WIP
 
 ## TODO:
-- Fix relative links
 - Download and create relative links for CSS images
+- Favicons
+- Remove anchor links from URLs
 - Web fonts
-- Ditch URL arguments in download destination
