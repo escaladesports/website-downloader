@@ -14,7 +14,7 @@ scrapePage('http://www.escaladesports.com/', {
 			attribute: 'data-full'
 		}
 	},
-	relativeLinks: true,
+	relativeLinks: false,
 	getContent: true,
 	transformDom: function(window){
 		window.document.body.classList.add('offline')

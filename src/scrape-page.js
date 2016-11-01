@@ -2,7 +2,6 @@
 const path = require('path')
 const jsdom = require('jsdom')
 const checkLink = require('./validate')
-const relativeLink = require('./relative-link')
 
 // Parses links from a page and returns content
 function scrapePage(url, opt, cb){
