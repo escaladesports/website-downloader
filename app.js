@@ -217,6 +217,9 @@ function downloadFile(url, dest, cb) {
 			if(errored === false){
 				file.close(cb)
 			}
+			else{
+				file.close()
+			}
 		})
 		file.on('error', err => {
 			errored = true
