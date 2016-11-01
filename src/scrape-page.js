@@ -1,5 +1,7 @@
 'use strict'
 const jsdom = require('jsdom')
+const checkLink = require('./validate')
+const relativeLink = require('./relative-link')
 
 // Parses links from a page and returns content
 function scrapePage(url, opt, cb){
@@ -12,6 +14,11 @@ function scrapePage(url, opt, cb){
 			const output = {}
 
 			let i, els, link
+
+			// Apply transforms
+			if('transformDom' in opt){
+				opt.transformDom(window)
+			}
 
 			// Get links
 			if(opt.getLinks){
@@ -103,62 +110,7 @@ function scrapePage(url, opt, cb){
 
 
 
-// Makes link relative
-function relativeLink(currentPage, targetPage){
 
-	// Remove domains
-	currentPage = currentPage.split('//')[1].split('/')
-	currentPage.shift()
-
-
-	// If file, back up to current directory
-	if(currentPage[currentPage.length - 1].indexOf('.') > -1){
-		currentPage.pop()
-	}
-	targetPage = targetPage.split('//')[1].split('/')
-	targetPage.shift()
-
-	if(currentPage[currentPage.length - 1] === ''){
-		currentPage.pop()
-	}
-
-
-	let i
-	for(i = currentPage.length; i--;){
-		currentPage[i] = '..'
-	}
-
-
-	// Rejoin paths
-	currentPage = currentPage.join('/')
-	targetPage = targetPage.join('/')
-
-	if(currentPage) currentPage = currentPage + '/'
-
-
-	return `${currentPage}${targetPage}`
-}
-
-
-
-
-// Validates link
-function checkLink(link, opt){
-	if(
-		link &&
-		link.indexOf('http') === 0 &&
-		opt.filter(link)
-	){
-		if(opt.domains){
-			let i
-			let domain = link.split('//')[1].split('/')[0]
-			if(opt.domains.indexOf(domain) === -1){
-				return false
-			}
-		}
-		return true
-	}
-}
 
 
 

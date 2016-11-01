@@ -99,10 +99,11 @@ function downloadStyles(queue, progress, opt, cb){
 		console.log(`Styles: ${progress + 1}/${queue.links.length}`)
 		console.log(`Downloading style: ${queue.styles[progress]}`)
 	}
-	scrapeStyle(queue.styles[progress], (err, data) => {
+	scrapeStyle(queue.styles[progress], opt, (err, obj) => {
 		if(err) return cb(err)
+		addQueue(queue.images, obj.urls)
 		let path = `${opt.downloadPath}/${localizeLink(queue.styles[progress])}`
-		fs.outputFile(path, data, err => {
+		fs.outputFile(path, obj.content, err => {
 			if(err) return cb(err)
 			if(opt.verbose === true){
 				console.log(`Downloaded style to: ${path}`)

@@ -3,7 +3,6 @@
 WIP
 
 ## TODO:
-- Download and create relative links for CSS images
+- Transform DOM
 - Favicons
 - Remove anchor links from URLs
-- Web fonts
