@@ -78,7 +78,7 @@ function downloadPages(queue, progress, opt, cb){
 		addQueue(queue.styles, obj.styles)
 		addQueue(queue.scripts, obj.scripts)
 		addQueue(queue.images, obj.images)
-		let path = `${opt.downloadPath}/${localizeLink(queue.links[progress])}`
+		let path = decodeURIComponent(`${opt.downloadPath}/${localizeLink(queue.links[progress])}`)
 		fs.outputFile(path, obj.content, err => {
 			if(err) return cb(err)
 			if(opt.verbose === true){
@@ -102,7 +102,7 @@ function downloadStyles(queue, progress, opt, cb){
 	scrapeStyle(queue.styles[progress], opt, (err, obj) => {
 		if(err) return cb(err)
 		addQueue(queue.images, obj.urls)
-		let path = `${opt.downloadPath}/${localizeLink(queue.styles[progress])}`
+		let path = decodeURIComponent(`${opt.downloadPath}/${localizeLink(queue.styles[progress])}`)
 		fs.outputFile(path, obj.content, err => {
 			if(err) return cb(err)
 			if(opt.verbose === true){
@@ -125,7 +125,7 @@ function downloadScripts(queue, progress, opt, cb){
 		console.log(`Downloading script: ${queue.scripts[progress]}`)
 	}
 
-	let path = `${opt.downloadPath}/${localizeLink(queue.scripts[progress])}`
+	let path = decodeURIComponent(`${opt.downloadPath}/${localizeLink(queue.scripts[progress])}`)
 	downloadFile(queue.scripts[progress], path, err => {
 		if(err){
 			console.log(err)
@@ -148,7 +148,7 @@ function downloadImages(queue, progress, opt, cb){
 		console.log(`Images: ${progress + 1}/${queue.images.length}`)
 		console.log(`Downloading image: ${queue.images[progress]}`)
 	}
-	let path = `${opt.downloadPath}/${localizeLink(queue.images[progress])}`
+	let path = decodeURIComponent(`${opt.downloadPath}/${localizeLink(queue.images[progress])}`)
 	downloadFile(queue.images[progress], path, err => {
 		if(err){
 			console.log(err)
