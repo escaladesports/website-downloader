@@ -37,9 +37,11 @@ function scrapeStyle(url, opt, cb){
 
 
 
-				if(opt.relativeLinks === true && checkLink(sanitizedUrl, opt)){
+				if(checkLink(sanitizedUrl, opt)){
 					// Relative-ize link
-					output.content = output.content.replace(urls[i], `url("${path.relative(url, sanitizedUrl)}")`)
+					if(opt.relativeLinks === true){
+						output.content = output.content.replace(urls[i], `url("${path.relative(url, sanitizedUrl)}")`)
+					}
 					output.urls.push(sanitizedUrl)
 				}
 			}
