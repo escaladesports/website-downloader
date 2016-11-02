@@ -45,7 +45,7 @@ function scrapePage(url, opt, cb){
 					link = els[i].src
 					if(link && checkLink(link, opt)){
 						output.images.push(link)
-						if(opt.relativeLinks === true){
+						if(opt.relativeImages === true){
 							els[i].setAttribute('src', path.relative(url, link))
 						}
 					}
@@ -60,7 +60,7 @@ function scrapePage(url, opt, cb){
 					link = els[i].href
 					if(els[i].rel && els[i].rel === 'stylesheet' && checkLink(link, opt)){
 						output.styles.push(link)
-						if(opt.relativeLinks === true){
+						if(opt.relativeStyles === true){
 							els[i].setAttribute('href', path.relative(url, link))
 						}
 					}
@@ -75,7 +75,7 @@ function scrapePage(url, opt, cb){
 					link = els[i].src
 					if(checkLink(link, opt)){
 						output.scripts.push(link)
-						if(opt.relativeLinks === true){
+						if(opt.relativeScripts === true){
 							els[i].setAttribute('src', path.relative(url, link))
 						}
 					}
@@ -92,7 +92,7 @@ function scrapePage(url, opt, cb){
 						link = els[i].getAttribute(opt.custom[key].attribute)
 						if(checkLink(link, opt)){
 							output[key].push(link)
-							if(opt.relativeLinks === true){
+							if(opt.relativeCustom === true){
 								els[i].setAttribute(opt.custom[key].attribute, path.relative(url, link))
 							}
 						}

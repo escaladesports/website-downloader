@@ -15,6 +15,11 @@ scrapePage('http://www.escaladesports.com/', {
 		}
 	},
 	relativeLinks: false,
+	relativeScripts: true,
+	relativeStyles: true,
+	relativeImages: true,
+	relativeCustom: true,
+	removeUrlParameters: true,
 	getContent: true,
 	postDomTransform: function(window){
 		window.document.body.classList.add('offline')
