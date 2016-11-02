@@ -12,8 +12,7 @@ const defaultOptions = {
 	verbose: true,
 	relativeLinks: true,
 	method: 'dom',
-	downloadPath: './download',
-	filter: () => true
+	downloadPath: './download'
 }
 
 

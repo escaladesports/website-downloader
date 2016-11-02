@@ -15,4 +15,5 @@ module.exports = function(link, opt){
 		}
 		return true
 	}
+	return false
 }

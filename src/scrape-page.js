@@ -1,5 +1,6 @@
 'use strict'
 const path = require('path')
+const url = require('url')
 const jsdom = require('jsdom')
 const checkLink = require('./validate')
 
@@ -29,9 +30,12 @@ function scrapePage(url, opt, cb){
 					if(checkLink(link, opt)){
 						output.links.push(link)
 						if(opt.relativeLinks === true){
-							link = path.relative(url, link)
+							link = path.relative(removeDomain(url), removeDomain(link))
 							if(!link) link = '../'
 							els[i].setAttribute('href', link)
+						}
+						else if('linkTransform' in opt){
+							els[i].setAttribute('href', opt.linkTransform(els[i].getAttribute('href')))
 						}
 					}
 				}
@@ -46,7 +50,11 @@ function scrapePage(url, opt, cb){
 					if(link && checkLink(link, opt)){
 						output.images.push(link)
 						if(opt.relativeImages === true){
-							els[i].setAttribute('src', path.relative(url, link))
+							link = path.relative(removeDomain(url), removeDomain(link))
+							els[i].setAttribute('src', link)
+						}
+						else if('linkTransform' in opt){
+							els[i].setAttribute('src', opt.linkTransform(els[i].getAttribute('src')))
 						}
 					}
 				}
@@ -61,7 +69,11 @@ function scrapePage(url, opt, cb){
 					if(els[i].rel && els[i].rel === 'stylesheet' && checkLink(link, opt)){
 						output.styles.push(link)
 						if(opt.relativeStyles === true){
-							els[i].setAttribute('href', path.relative(url, link))
+							link = path.relative(removeDomain(url), removeDomain(link))
+							els[i].setAttribute('href', link)
+						}
+						else if('linkTransform' in opt){
+							els[i].setAttribute('href', opt.linkTransform(els[i].getAttribute('href')))
 						}
 					}
 				}
@@ -76,7 +88,11 @@ function scrapePage(url, opt, cb){
 					if(checkLink(link, opt)){
 						output.scripts.push(link)
 						if(opt.relativeScripts === true){
-							els[i].setAttribute('src', path.relative(url, link))
+							link = path.relative(removeDomain(url), removeDomain(link))
+							els[i].setAttribute('src', link)
+						}
+						else if('linkTransform' in opt){
+							els[i].setAttribute('src', opt.linkTransform(els[i].getAttribute('src')))
 						}
 					}
 				}
@@ -93,7 +109,11 @@ function scrapePage(url, opt, cb){
 						if(checkLink(link, opt)){
 							output[key].push(link)
 							if(opt.relativeCustom === true){
-								els[i].setAttribute(opt.custom[key].attribute, path.relative(url, link))
+								link = path.relative(removeDomain(url), removeDomain(link))
+								els[i].setAttribute(opt.custom[key].attribute, link)
+							}
+							else if('linkTransform' in opt){
+								els[i].setAttribute(opt.custom[key].attribute, opt.linkTransform(els[i].getAttribute(opt.custom[key].attribute)))
 							}
 						}
 					}
@@ -120,7 +140,14 @@ function scrapePage(url, opt, cb){
 
 
 
+function removeDomain(link){
+	// If no domain
+	if(link.indexOf('http') !== 0) return link
 
+	// Remove domain
+	link = url.parse(link)
+	return link.pathname
+}
 
 
 
